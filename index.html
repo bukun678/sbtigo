@@ -491,6 +491,23 @@
 }
 </style>
 
+
+<style id="v20-question-share-fixes">
+.question-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+.question-head-mid{display:none !important;}
+.question-head-right{margin-left:auto;}
+
+/* share card panel copy tightening */
+.share-card-panel .panel-desc{
+  max-width: 680px;
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -1910,42 +1927,40 @@ const dimensionMeta = {
           if (b.score !== a.score) return b.score - a.score;
           return a.dim.localeCompare(b.dim);
         })
-        .slice(0, 6);
+        .slice(0, 3);
 
+      const dimBoxW = mainW - 80;
+      const dimBoxH = 102;
       dimEntries.forEach((item, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const boxW = (mainW - 92) / 2;
-        const boxH = 128;
-        const x = mainX + 40 + col * (boxW + 12);
-        const y = cursorY + 24 + row * (boxH + 14);
-        roundRect(ctx, x, y, boxW, boxH, 24);
+        const x = mainX + 40;
+        const y = cursorY + 24 + idx * (dimBoxH + 14);
+        roundRect(ctx, x, y, dimBoxW, dimBoxH, 24);
         ctx.fillStyle = 'rgba(255,255,255,0.05)';
         ctx.fill();
-        ctx.strokeStyle = idx < 2 ? (idx === 0 ? c1 : c2) : 'rgba(255,255,255,0.09)';
+        ctx.strokeStyle = idx === 0 ? c1 : (idx === 1 ? c2 : 'rgba(255,255,255,0.09)');
         ctx.lineWidth = 2;
         ctx.stroke();
 
         ctx.fillStyle = '#f8fbff';
         ctx.font = '700 27px Arial, PingFang SC, Microsoft YaHei, sans-serif';
-        ctx.fillText(item.name, x + 24, y + 40);
+        ctx.fillText(item.name, x + 24, y + 38);
         ctx.textAlign = 'right';
         ctx.font = '700 28px Arial, PingFang SC, Microsoft YaHei, sans-serif';
-        ctx.fillText(`${item.level} / ${item.score}分`, x + boxW - 24, y + 40);
+        ctx.fillText(`${item.level} / ${item.score}分`, x + dimBoxW - 24, y + 38);
         ctx.textAlign = 'left';
         ctx.fillStyle = '#c8d4ea';
         ctx.font = '500 24px Arial, PingFang SC, Microsoft YaHei, sans-serif';
         const dimText = DIM_EXPLANATIONS[item.dim][item.level];
-        const lines = wrapText(ctx, dimText, boxW - 48).slice(0, 2);
+        const lines = wrapText(ctx, dimText, dimBoxW - 48).slice(0, 2);
         lines.forEach((line, lineIdx) => {
-          ctx.fillText(line, x + 24, y + 82 + lineIdx * 28);
+          ctx.fillText(line, x + 24, y + 74 + lineIdx * 26);
         });
       });
 
-      cursorY += 456;
+      cursorY += 24 + dimEntries.length * (dimBoxH + 14) + 18;
       drawSectionTitle('说明', cursorY);
       const noteBoxY = cursorY + 22;
-      roundRect(ctx, mainX + 40, noteBoxY, mainW - 80, 172, 28);
+      roundRect(ctx, mainX + 40, noteBoxY, mainW - 80, 150, 28);
       ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.fill();
       ctx.fillStyle = '#dbe7ff';
