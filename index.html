@@ -585,6 +585,60 @@
 }
 </style>
 
+
+<style id="tip-jar-style">
+.tip-jar-card{
+  margin-top: 24px;
+  padding: 24px 20px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.tip-jar-card h3{
+  margin: 0 0 10px;
+  font-size: 28px;
+  line-height: 1.25;
+  color: #fff;
+  font-weight: 800;
+}
+.tip-jar-card p{
+  margin: 0 0 16px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.76);
+}
+.tip-jar-code{
+  width: 220px;
+  max-width: 72%;
+  display: block;
+  margin: 0 auto 12px;
+  border-radius: 18px;
+  background: #fff;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.tip-jar-note{
+  font-size: 14px;
+  color: rgba(255,255,255,0.48);
+}
+@media (max-width: 640px){
+  .tip-jar-card{
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+  .tip-jar-card h3{
+    font-size: 24px;
+  }
+  .tip-jar-card p{
+    font-size: 15px;
+  }
+  .tip-jar-code{
+    max-width: 82%;
+  }
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -658,7 +712,15 @@
           </div>
 
           <div class="analysis-box">
-            <h3>你的类型解读</h3>
+            
+<div class="tip-jar-card">
+  <h3>觉得有意思的话，请我喝杯奶茶</h3>
+  <p>如果这个测试把你逗笑了，或者你觉得还挺准，可以随意请我喝杯奶茶。</p>
+  <img class="tip-jar-code" src="image/reward-wechat.png" alt="微信收款码">
+  <div class="tip-jar-note">完全自愿，不影响使用</div>
+</div>
+
+<h3>你的类型解读</h3>
             <p id="resultDesc"></p>
           </div>
 
