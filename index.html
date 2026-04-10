@@ -119,8 +119,15 @@
     .progress { flex: 1; height: 12px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
     .progress span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-2)); box-shadow: 0 0 18px rgba(29, 242, 255, 0.48); }
     .progress-text { min-width: 78px; text-align: right; color: var(--muted); font-weight: 600; }
-    .question-list { display: grid; gap: 16px; }
-    .question { padding: 16px; }
+    .question-list { display: block; min-height: 420px; }
+    .question { padding: 18px; animation: questionFade .22s ease; }
+    @keyframes questionFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .question-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .question-stage { color: var(--muted); font-size: 13px; }
+    .question-actions-inline { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .btn-ghost { appearance: none; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text); border-radius: 999px; padding: 10px 16px; cursor: pointer; font-size: 14px; }
+    .btn-ghost:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-ghost:hover:not(:disabled) { border-color: rgba(29,242,255,0.25); }
     .question-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; color: var(--muted); font-size: 13px; }
     .badge { padding: 6px 10px; border-radius: 999px; background: rgba(124, 92, 255, 0.16); color: #d7d1ff; font-weight: 700; }
     .question-title { font-size: 15px; line-height: 1.72; margin-bottom: 14px; font-weight: 500; }
@@ -257,7 +264,7 @@
           <div class="hint" id="testHint">把题做完才能出结果。快的话几分钟就能测完。</div>
           <div style="display:flex; gap:12px; flex-wrap:wrap;">
             <button id="backIntroBtn" class="btn-secondary">返回首页</button>
-            <button id="submitBtn" class="btn-primary" disabled>提交并查看结果</button>
+            <button id="submitBtn" class="btn-primary" disabled style="display:none;">提交并查看结果</button>
           </div>
         </div>
       </div>
@@ -1019,7 +1026,8 @@ const dimensionMeta = {
     const app = {
       shuffledQuestions: [],
       answers: {},
-      previewMode: false
+      previewMode: false,
+      currentQuestionId: null
     };
 
     const screens = {
@@ -1064,97 +1072,119 @@ const dimensionMeta = {
       return app.previewMode ? dimensionMeta[q.dim].name : '维度已隐藏';
     }
 
+    function getCurrentQuestionIndex() {
+      const visibleQuestions = getVisibleQuestions();
+      let index = visibleQuestions.findIndex(q => q.id === app.currentQuestionId);
+      if (index === -1) {
+        index = visibleQuestions.findIndex(q => app.answers[q.id] === undefined);
+      }
+      if (index === -1) index = visibleQuestions.length - 1;
+      if (index < 0) index = 0;
+      return index;
+    }
+
+    function goToQuestionByIndex(index) {
+      const visibleQuestions = getVisibleQuestions();
+      if (!visibleQuestions.length) return;
+      const safeIndex = Math.max(0, Math.min(index, visibleQuestions.length - 1));
+      app.currentQuestionId = visibleQuestions[safeIndex].id;
+      renderQuestions();
+    }
+
+    function handleQuestionAnswer(name, value) {
+      app.answers[name] = Number(value);
+
+      if (name === 'drink_gate_q1' && Number(value) !== 3) {
+        delete app.answers['drink_gate_q2'];
+      }
+
+      const visibleQuestions = getVisibleQuestions();
+      const currentIndex = visibleQuestions.findIndex(q => q.id === name);
+      const nextUnanswered = visibleQuestions.find((q, idx) => idx > currentIndex && app.answers[q.id] === undefined);
+      const firstUnanswered = visibleQuestions.find(q => app.answers[q.id] === undefined);
+      const target = nextUnanswered || firstUnanswered;
+
+      if (target) {
+        app.currentQuestionId = target.id;
+        setTimeout(() => renderQuestions(), 120);
+        return;
+      }
+
+      updateProgress();
+      setTimeout(() => renderResult(), 140);
+    }
+
     function renderQuestions() {
       const visibleQuestions = getVisibleQuestions();
       questionList.innerHTML = '';
-      visibleQuestions.forEach((q, index) => {
-        const card = document.createElement('article');
-        card.className = 'question';
-        card.dataset.qid = q.id;
-        card.innerHTML = `
-          <div class="question-meta">
-            <div class="badge">第 ${index + 1} 题</div>
+      if (!visibleQuestions.length) {
+        updateProgress();
+        return;
+      }
+
+      const currentIndex = getCurrentQuestionIndex();
+      const q = visibleQuestions[currentIndex];
+      app.currentQuestionId = q.id;
+      const card = document.createElement('article');
+      card.className = 'question';
+      card.dataset.qid = q.id;
+      card.innerHTML = `
+        <div class="question-nav">
+          <div class="question-meta" style="margin-bottom:0;">
+            <div class="badge">第 ${currentIndex + 1} 题 / 共 ${visibleQuestions.length} 题</div>
             <div>${getQuestionMetaLabel(q)}</div>
           </div>
-          <div class="question-title">${q.text}</div>
-          <div class="options">
-            ${q.options.map((opt, i) => {
-              const code = ['A', 'B', 'C', 'D'][i] || String(i + 1);
-              const checked = app.answers[q.id] === opt.value ? 'checked' : '';
-              return `
-                <label class="option">
-                  <input type="radio" name="${q.id}" value="${opt.value}" ${checked} />
-                  <div class="option-code">${code}</div>
-                  <div class="option-text">${opt.label}</div>
-                </label>
-              `;
-            }).join('')}
-          </div>
-        `;
-        questionList.appendChild(card);
-      });
+          <div class="question-stage">一次只做一题</div>
+        </div>
+        <div class="question-title">${q.text}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => {
+            const code = ['A', 'B', 'C', 'D'][i] || String(i + 1);
+            const checked = app.answers[q.id] === opt.value ? 'checked' : '';
+            return `
+              <label class="option">
+                <input type="radio" name="${q.id}" value="${opt.value}" ${checked} />
+                <div class="option-code">${code}</div>
+                <div class="option-text">${opt.label}</div>
+              </label>
+            `;
+          }).join('')}
+        </div>
+        <div class="question-actions-inline">
+          <button type="button" class="btn-ghost" id="prevQuestionBtn" ${currentIndex === 0 ? 'disabled' : ''}>上一题</button>
+          <button type="button" class="btn-ghost" id="nextQuestionBtn" ${currentIndex === visibleQuestions.length - 1 ? 'disabled' : ''}>下一题</button>
+        </div>
+      `;
+      questionList.appendChild(card);
 
       questionList.querySelectorAll('input[type="radio"]').forEach(input => {
         input.addEventListener('change', (e) => {
           const { name, value } = e.target;
-          app.answers[name] = Number(value);
-
-          if (name === 'drink_gate_q1') {
-            if (Number(value) !== 3) {
-              delete app.answers['drink_gate_q2'];
-            }
-            renderQuestions();
-            setTimeout(() => scrollToNextQuestion(name), 60);
-            return;
-          }
-
-          updateProgress();
-          setTimeout(() => scrollToNextQuestion(name), 60);
+          handleQuestionAnswer(name, value);
         });
       });
 
+      const prevBtn = document.getElementById('prevQuestionBtn');
+      const nextBtn = document.getElementById('nextQuestionBtn');
+      if (prevBtn) prevBtn.addEventListener('click', () => goToQuestionByIndex(currentIndex - 1));
+      if (nextBtn) nextBtn.addEventListener('click', () => goToQuestionByIndex(currentIndex + 1));
+
       updateProgress();
-    }
-
-    function scrollToNextQuestion(currentId) {
-      const visibleQuestions = getVisibleQuestions();
-      const currentIndex = visibleQuestions.findIndex(q => q.id === currentId);
-      const nextUnanswered = visibleQuestions.find((q, idx) => idx > currentIndex && app.answers[q.id] === undefined);
-      if (nextUnanswered) {
-        const card = questionList.querySelector(`[data-qid="${nextUnanswered.id}"]`);
-        if (card) {
-          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        return;
-      }
-
-      const firstUnanswered = visibleQuestions.find(q => app.answers[q.id] === undefined);
-      if (firstUnanswered) {
-        const card = questionList.querySelector(`[data-qid="${firstUnanswered.id}"]`);
-        if (card) {
-          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        return;
-      }
-
-      const submitArea = document.getElementById('submitBtn');
-      if (submitArea) {
-        submitArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
     }
 
     function updateProgress() {
       const visibleQuestions = getVisibleQuestions();
       const total = visibleQuestions.length;
       const done = visibleQuestions.filter(q => app.answers[q.id] !== undefined).length;
+      const currentIndex = total ? getCurrentQuestionIndex() : 0;
       const percent = total ? (done / total) * 100 : 0;
       progressBar.style.width = `${percent}%`;
-      progressText.textContent = `${done} / ${total}`;
+      progressText.textContent = total ? `${currentIndex + 1} / ${total}` : '0 / 0';
       const complete = done === total && total > 0;
       submitBtn.disabled = !complete;
       testHint.textContent = complete
-        ? '都做完了。现在可以把你的电子魂魄交给结果页审判。'
-        : '把题做完才能出结果。快的话几分钟就能测完。';
+        ? '已全部完成，正在准备结果。'
+        : '选完就会自动切到下一题，不用往下滑。';
     }
 
     function sumToLevel(score) {
@@ -1321,6 +1351,7 @@ const dimensionMeta = {
         specialQuestions[0],
         ...shuffledRegular.slice(insertIndex)
       ];
+      app.currentQuestionId = app.shuffledQuestions[0]?.id || null;
       renderQuestions();
       showScreen('test');
     }
