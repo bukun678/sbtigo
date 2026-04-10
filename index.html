@@ -347,6 +347,35 @@
 }
 </style>
 
+
+<style id="v10-spacing-save-mode">
+/* v10: more breathing room for note area */
+.result-note{
+  margin-top: 48px !important;
+  padding: 22px 20px 24px !important;
+}
+.result-note-title{
+  margin-bottom: 14px !important;
+}
+.result-note,
+.result-note p,
+.result-note-text{
+  line-height: 1.85 !important;
+}
+.dimension-grid{
+  margin-bottom: 8px !important;
+}
+.share-save-hint{
+  margin-top: 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255,255,255,.72);
+}
+.share-save-hint strong{
+  color: #fff;
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -1820,7 +1849,7 @@ const dimensionMeta = {
       shareCardState.result = result;
       sharePreviewImage.src = dataUrl;
       sharePreviewImage.alt = `${type.code}（${type.cn}）分享卡`;
-      shareStatus.textContent = '分享卡已生成，点按钮即可保存或直接分享。';
+      shareStatus.textContent = '<span id="shareStatusText">分享卡已生成，先点一次会提示你长按保存；再点一次会直接下载图片。</span>';
     }
 
     async function updateShareCard(result) {
@@ -1854,7 +1883,7 @@ const dimensionMeta = {
               files: [file],
               title: filename
             });
-            shareStatus.textContent = '分享卡已打开系统分享面板。';
+            shareStatus.textContent = '请长按上方图片保存；若想直接下载，再点一次“保存分享卡”。';
             return;
           }
         }
@@ -1883,6 +1912,9 @@ document.getElementById('startBtn').addEventListener('click', () => startTest(fa
     document.getElementById('restartBtn').addEventListener('click', () => startTest(false));
     document.getElementById('toTopBtn').addEventListener('click', () => showScreen('intro'));
   
+
+let __shareCardPressStage = 0;
+
 async function getShareCardFileData() {
   const canvas = await ensureShareCanvasReady();
   const blob = await new Promise((resolve, reject) => {
@@ -1915,12 +1947,18 @@ function downloadByAnchor(url, filename) {
   }, 1200);
 }
 
+function setShareStatusText(text) {
+  const el = document.getElementById('shareStatusText');
+  if (el) el.textContent = text;
+}
+
 function openWechatSaveMask(imageUrl) {
   const mask = document.getElementById('wechatSaveMask');
   const preview = document.getElementById('wechatSavePreview');
   if (!mask || !preview) return;
   preview.src = imageUrl;
   mask.classList.add('show');
+  setShareStatusText('请长按上方图片保存；若还想直接下载，再点一次“保存分享卡”。');
 }
 
 function closeWechatSaveMask(evt) {
@@ -1938,18 +1976,59 @@ async function downloadShareCardImage() {
   try {
     const data = await getShareCardFileData();
     downloadByAnchor(data.url, data.filename);
+    setShareStatusText('请长按上方图片保存；若想直接下载，再点一次“保存分享卡”。');
   } catch (err) {
     console.error(err);
     alert('保存失败，请长按上方图片试试。');
   }
 }
 
+async function saveShareCard() {
+  try {
+    const data = await getShareCardFileData();
+    const isWechat = /MicroMessenger/i.test(navigator.userAgent || "");
+
+    if (isWechat) {
+      if (__shareCardPressStage === 0) {
+        __shareCardPressStage = 1;
+        openWechatSaveMask(data.url);
+        return;
+      }
+      __shareCardPressStage = 0;
+      closeWechatSaveMask();
+      downloadByAnchor(data.url, data.filename);
+      setShareStatusText('已切换为下载模式，若你在微信里发图，优先建议先长按保存到相册。');
+      return;
+    }
+
+    if (navigator.canShare && navigator.share && data.file) {
+      try {
+        if (navigator.canShare({ files: [data.file] })) {
+          await navigator.share({
+            files: [data.file],
+            title: data.filename,
+            text: 'SBTI 分享结果卡'
+          });
+          setShareStatusText('系统分享面板已打开。');
+          return;
+        }
+      } catch (err) {
+      }
+    }
+
+    downloadByAnchor(data.url, data.filename);
+    setShareStatusText('请长按上方图片保存；若想直接下载，再点一次“保存分享卡”。');
+  } catch (err) {
+    console.error(err);
+    alert('生成分享卡失败，请稍后重试。');
+  }
+}
 </script>
 
 <div id="wechatSaveMask" class="wechat-save-mask" onclick="closeWechatSaveMask(event)">
   <div class="wechat-save-panel" onclick="event.stopPropagation()">
-    <h3 class="wechat-save-title">长按图片保存</h3>
-    <p class="wechat-save-sub">微信内无法把 H5 临时生成的图片直接“转发给朋友”并稳定保留文件，所以这里改成先长按保存到相册，再从微信里发送，成功率更高。</p>
+    <h3 class="wechat-save-title">长按图片保存到相册</h3>
+    <p class="wechat-save-sub">微信里最稳的方式是：先长按下面这张图保存到相册，再去聊天窗口发送。为了少折腾你，这个按钮第一次点默认就是提醒你长按保存；如果你再点一次按钮，就会直接下载图片。</p>
     <img id="wechatSavePreview" class="wechat-save-preview" alt="分享卡预览" />
     <div class="wechat-save-actions">
       <button class="wechat-save-btn primary" onclick="downloadShareCardImage()">保存到设备</button>
