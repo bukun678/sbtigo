@@ -167,7 +167,7 @@
     .poster-box.no-image { display: grid; place-items: center; }
     .poster-box.no-image::before { content: "原始结果图缺失"; color: var(--muted); font-size: 15px; }
     .poster-image { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; background: #ffffff; padding: 12px; box-sizing: border-box; }
-    .poster-caption { position: absolute; left: 18px; right: 18px; bottom: 18px; padding: 14px 16px; border-radius: 18px; background: rgba(6, 10, 18, 0.76); border: 1px solid rgba(255,255,255,0.12); color: #f8fbff; line-height: 1.6; }
+    .poster-caption { position: absolute; left: 18px; right: 18px; bottom: 18px; padding: 12px 14px; border-radius: 16px; background: rgba(6, 10, 18, 0.68); border: 1px solid rgba(255,255,255,0.10); color: #f8fbff; line-height: 1.55; }
     .type-box { padding: 24px; display: flex; flex-direction: column; justify-content: center; }
     .type-kicker { color: var(--muted); font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .08em; }
     .type-name { font-size: clamp(34px, 4vw, 62px); line-height: 1.05; letter-spacing: -0.04em; font-weight: 800; margin-bottom: 16px; }
@@ -526,6 +526,44 @@
 <style id="v22-hide-question-stage">
 .question-stage{
   display:none !important;
+}
+</style>
+
+
+<style id="v23-question-meta-and-poster-fixes">
+.question-nav{
+  display:block !important;
+}
+.question-meta{
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  width:100% !important;
+}
+.question-meta > :last-child{
+  margin-left:auto !important;
+  text-align:right !important;
+  white-space:nowrap !important;
+}
+.poster-box{
+  height: 560px !important;
+  min-height: 560px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+.poster-image{
+  width:auto !important;
+  height:auto !important;
+  max-width:100% !important;
+  max-height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  padding: 0 !important;
+  background:#ffffff !important;
+  border-radius: 18px !important;
 }
 </style>
 
@@ -1895,13 +1933,13 @@ const dimensionMeta = {
       const imageY = mainY + 146;
       ctx.save();
       roundRect(ctx, imageX, imageY, imageW, imageH, 30);
-      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillStyle = '#ffffff';
       ctx.fill();
       ctx.clip();
       try {
         const poster = await loadImage(TYPE_IMAGES[type.code]);
         if (poster) {
-          const ratio = Math.max(imageW / poster.width, imageH / poster.height);
+          const ratio = Math.min((imageW - 16) / poster.width, (imageH - 16) / poster.height);
           const drawW = poster.width * ratio;
           const drawH = poster.height * ratio;
           const drawX = imageX + (imageW - drawW) / 2;
