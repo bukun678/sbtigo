@@ -428,6 +428,27 @@
 }
 </style>
 
+
+<style id="v17-share-headings-question-header-fix">
+.share-section-title{
+  margin: 18px 0 10px;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 800;
+  color: #ffffff;
+}
+.question-head-mid:empty,
+.question-head-mid:blank{
+  display:none !important;
+}
+.question-head{
+  justify-content: space-between;
+}
+.question-head-right{
+  margin-left:auto;
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -513,7 +534,7 @@
           <div class="note-box">
             <h3>说明</h3>
             <p id="funNote">本测试仅供娱乐，别拿它当诊断、面试、相亲、分手、招魂、算命或人生判决书。</p>
-            <div class="result-footer-note">保留原版题库与结果判定，只把首页和结果页做得更适合直接使用和分享。</div>
+            <div class="result-footer-note"></div>
           </div>
         </div>
 
@@ -1332,7 +1353,7 @@ const dimensionMeta = {
             <div class="badge">第 ${currentIndex + 1} 题 / 共 ${visibleQuestions.length} 题</div>
             <div>${getQuestionMetaLabel(q)}</div>
           </div>
-          <div class="question-stage">一次只做一题</div>
+          <div class="question-stage">维度已隐藏</div>
         </div>
         <div class="question-title">${q.text}</div>
         <div class="options">
