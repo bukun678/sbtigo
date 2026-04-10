@@ -239,6 +239,114 @@
 .result-note{margin-top:32px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);}
 </style>
 
+
+<style>
+/* v9 spacing tune */
+.share-card-panel .panel-card,
+.result-main-card,
+.result-card,
+.share-preview-card{
+  padding: 28px !important;
+}
+.result-section,
+.share-section{
+  margin-bottom: 28px !important;
+}
+.result-desc,
+.share-desc{
+  line-height: 1.78 !important;
+}
+.dimension-grid{
+  gap: 14px !important;
+  margin-top: 14px !important;
+}
+.dimension-item{
+  padding: 16px 16px 14px !important;
+}
+.result-note{
+  margin-top: 38px !important;
+  padding: 18px 18px 20px !important;
+  line-height: 1.72 !important;
+}
+.result-note-title{
+  margin-bottom: 12px !important;
+}
+.share-card-canvas-wrap{
+  padding-bottom: 18px !important;
+}
+.generated-footer{
+  margin-top: 16px !important;
+}
+
+/* WeChat image save sheet */
+.wechat-save-mask{
+  position: fixed;
+  inset: 0;
+  background: rgba(5,10,20,.82);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.wechat-save-mask.show{ display:flex; }
+.wechat-save-panel{
+  width: min(92vw, 460px);
+  max-height: 92vh;
+  overflow: auto;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(15,23,42,.98), rgba(9,15,30,.98));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  padding: 20px;
+}
+.wechat-save-title{
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: #fff;
+}
+.wechat-save-sub{
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255,255,255,.72);
+  margin: 0 0 16px;
+}
+.wechat-save-preview{
+  width: 100%;
+  border-radius: 18px;
+  display: block;
+  background: #0b1220;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.wechat-save-actions{
+  display:flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.wechat-save-btn{
+  flex:1;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  color:#fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+.wechat-save-btn.primary{
+  background: linear-gradient(90deg,#7c5cff,#2ee6ff);
+  color:#08111f;
+  border: none;
+}
+.wechat-save-tip{
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,.64);
+  margin-top: 12px;
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -1774,6 +1882,82 @@ document.getElementById('startBtn').addEventListener('click', () => startTest(fa
     document.getElementById('submitBtn').addEventListener('click', renderResult);
     document.getElementById('restartBtn').addEventListener('click', () => startTest(false));
     document.getElementById('toTopBtn').addEventListener('click', () => showScreen('intro'));
-  </script>
+  
+async function getShareCardFileData() {
+  const canvas = await ensureShareCanvasReady();
+  const blob = await new Promise((resolve, reject) => {
+    try {
+      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('empty blob')), 'image/png', 1);
+    } catch (e) {
+      reject(e);
+    }
+  });
+  const code = (window.currentResult && (window.currentResult.code || window.currentResult.type || window.currentResult.key)) || 'RESULT';
+  const filename = 'SBTI-' + String(code).replace(/[^A-Z0-9_-]/ig, '') + '-share-card.png';
+  const url = URL.createObjectURL(blob);
+  let file = null;
+  try {
+    file = new File([blob], filename, { type: 'image/png' });
+  } catch (e) {}
+  return { canvas, blob, file, filename, url };
+}
+
+function downloadByAnchor(url, filename) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || 'SBTI-share-card.png';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    a.remove();
+    try { URL.revokeObjectURL(url); } catch (e) {}
+  }, 1200);
+}
+
+function openWechatSaveMask(imageUrl) {
+  const mask = document.getElementById('wechatSaveMask');
+  const preview = document.getElementById('wechatSavePreview');
+  if (!mask || !preview) return;
+  preview.src = imageUrl;
+  mask.classList.add('show');
+}
+
+function closeWechatSaveMask(evt) {
+  const mask = document.getElementById('wechatSaveMask');
+  const preview = document.getElementById('wechatSavePreview');
+  if (mask) mask.classList.remove('show');
+  if (preview && preview.src && preview.src.startsWith('blob:')) {
+    setTimeout(() => { try { URL.revokeObjectURL(preview.src); } catch (e) {} preview.src=''; }, 300);
+  } else if (preview) {
+    preview.src = '';
+  }
+}
+
+async function downloadShareCardImage() {
+  try {
+    const data = await getShareCardFileData();
+    downloadByAnchor(data.url, data.filename);
+  } catch (err) {
+    console.error(err);
+    alert('保存失败，请长按上方图片试试。');
+  }
+}
+
+</script>
+
+<div id="wechatSaveMask" class="wechat-save-mask" onclick="closeWechatSaveMask(event)">
+  <div class="wechat-save-panel" onclick="event.stopPropagation()">
+    <h3 class="wechat-save-title">长按图片保存</h3>
+    <p class="wechat-save-sub">微信内无法把 H5 临时生成的图片直接“转发给朋友”并稳定保留文件，所以这里改成先长按保存到相册，再从微信里发送，成功率更高。</p>
+    <img id="wechatSavePreview" class="wechat-save-preview" alt="分享卡预览" />
+    <div class="wechat-save-actions">
+      <button class="wechat-save-btn primary" onclick="downloadShareCardImage()">保存到设备</button>
+      <button class="wechat-save-btn" onclick="closeWechatSaveMask()">关闭</button>
+    </div>
+    <div class="wechat-save-tip">提示：在微信里优先用“长按图片 → 保存图片”。保存后，再到聊天窗口选择图片发送，最稳。</div>
+  </div>
+</div>
+
 </body>
 </html>
