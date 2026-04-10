@@ -400,14 +400,14 @@
   <div class="shell">
     <section id="intro" class="screen active">
       <div class="intro-topbar">
-        <div class="brand">SBTI<span>GO</div>
+        <div class="brand">SBTI<span>GO</span></div>
         <div class="intro-pill">31 题 · 27 种结果</div>
       </div>
       <div class="hero card">
         <div class="hero-main-panel">
           <div class="hero-copy">
             <div class="hero-tag">更真实 · 更离谱 · 更像你</div>
-            <h1>MBTI已经过时了，<br><span class="accent-line">SBTI来了。</h1>
+            <h1>MBTI已经过时了，<br><span class="accent-line">SBTI来了。</span></h1>
             <p class="hero-subline">31 个问题，27 种结果。<br>测出你在人际关系里的真实状态。</p>
             <div class="hero-actions">
               <button id="startBtn" class="btn-primary hero-cta">开始测试（别想太久）</button>
@@ -421,7 +421,7 @@
     <section id="test" class="screen">
       <div class="test-wrap card">
         <div class="topbar">
-          <div class="progress"><span id="progressBar"></div>
+          <div class="progress"><span id="progressBar"></span></div>
           <div class="progress-text" id="progressText">0 / 31</div>
         </div>
         <div id="questionList" class="question-list"></div>
@@ -505,8 +505,7 @@ const dimensionMeta = {
       E1: { name: 'E1 依恋安全感', model: '情感模型' },
       E2: { name: 'E2 情感投入度', model: '情感模型' },
       E3: { name: 'E3 边界与依赖', model: '情感模型' },
-      A1: { name: '维度参考
-A1 世界观倾向', model: '态度模型' },
+      A1: { name: 'A1 世界观倾向', model: '态度模型' },
       A2: { name: 'A2 规则与灵活度', model: '态度模型' },
       A3: { name: 'A3 人生意义感', model: '态度模型' },
       Ac1: { name: 'Ac1 动机导向', model: '行动驱力模型' },
@@ -884,8 +883,7 @@ A1 世界观倾向', model: '态度模型' },
     "code": "OJBK",
     "cn": "无所谓人",
     "intro": "我说随便，是真的随便。",
-    "desc": "你的类型解读
-你本质是“OJBK型”：看透但不争，选择轻松面对。因为跟草履虫辩论宇宙的未来毫无意义。为什么不较真？因为帝王不会在意脚下的尘埃是往左飘还是往右飘。"
+    "desc": "你本质是“OJBK型”：看透但不争，选择轻松面对。因为跟草履虫辩论宇宙的未来毫无意义。为什么不较真？因为帝王不会在意脚下的尘埃是往左飘还是往右飘。"
   },
   "MALO": {
     "code": "MALO",
@@ -1473,10 +1471,8 @@ A1 世界观倾向', model: '态度模型' },
       document.getElementById('resultDesc').textContent = type.desc;
       document.getElementById('posterCaption').textContent = type.intro;
       document.getElementById('funNote').textContent = result.special
-        ? '说明
-本测试仅供娱乐。隐藏人格和傻乐兜底都属于作者故意埋的损招，请勿把它当成医学、心理学、相学、命理学或灵异学依据。'
-        : '说明
-本测试仅供娱乐，别拿它当诊断、面试、相亲、分手、招魂、算命或人生判决书。你可以笑，但别太当真。';
+        ? '本测试仅供娱乐。隐藏人格和傻乐兜底都属于作者故意埋的损招，请勿把它当成医学、心理学、相学、命理学或灵异学依据。'
+        : '本测试仅供娱乐，别拿它当诊断、面试、相亲、分手、招魂、算命或人生判决书。你可以笑，但别太当真。';
 
       const posterBox = document.getElementById('posterBox');
       const posterImage = document.getElementById('posterImage');
