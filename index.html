@@ -1884,23 +1884,25 @@ const dimensionMeta = {
 
       const drawSectionTitle = (title, y) => {
         ctx.fillStyle = '#f8fbff';
-        ctx.font = '700 38px Arial, PingFang SC, Microsoft YaHei, sans-serif';
+        ctx.font = '800 34px Arial, PingFang SC, Microsoft YaHei, sans-serif';
         ctx.fillText(title, mainX + 40, y);
       };
 
-      drawSectionTitle('', cursorY);
-      roundRect(ctx, mainX + 40, cursorY + 24, mainW - 80, 250, 28);
+      drawSectionTitle('你的类型解读', cursorY);
+      const descBoxY = cursorY + 22;
+      const descBoxH = 312;
+      roundRect(ctx, mainX + 40, descBoxY, mainW - 80, descBoxH, 28);
       ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.fill();
       ctx.fillStyle = '#dbe7ff';
-      ctx.font = '500 29px Arial, PingFang SC, Microsoft YaHei, sans-serif';
-      const descLines = wrapText(ctx, type.desc, mainW - 136).slice(0, 6);
+      ctx.font = '500 27px Arial, PingFang SC, Microsoft YaHei, sans-serif';
+      const descLines = wrapText(ctx, type.desc, mainW - 136);
       descLines.forEach((line, idx) => {
-        ctx.fillText(line, mainX + 64, cursorY + 72 + idx * 35);
+        ctx.fillText(line, mainX + 64, descBoxY + 52 + idx * 32);
       });
 
-      cursorY += 326;
-      drawSectionTitle('', cursorY);
+      cursorY = descBoxY + descBoxH + 52;
+      drawSectionTitle('维度参考', cursorY);
 
       const dimEntries = dimensionOrder
         .map(dim => ({ dim, score: result.rawScores[dim], level: result.levels[dim], name: dimensionMeta[dim].name }))
@@ -1941,8 +1943,9 @@ const dimensionMeta = {
       });
 
       cursorY += 456;
-      drawSectionTitle('', cursorY);
-      roundRect(ctx, mainX + 40, cursorY + 24, mainW - 80, 172, 28);
+      drawSectionTitle('说明', cursorY);
+      const noteBoxY = cursorY + 22;
+      roundRect(ctx, mainX + 40, noteBoxY, mainW - 80, 172, 28);
       ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.fill();
       ctx.fillStyle = '#dbe7ff';
@@ -1950,7 +1953,7 @@ const dimensionMeta = {
       const noteText = `${document.getElementById('funNote').textContent} ${result.sub}`;
       const noteLines = wrapText(ctx, noteText, mainW - 136).slice(0, 4);
       noteLines.forEach((line, idx) => {
-        ctx.fillText(line, mainX + 64, cursorY + 72 + idx * 31);
+        ctx.fillText(line, mainX + 64, noteBoxY + 50 + idx * 31);
       });
 
       ctx.fillStyle = '#8ea3c7';
