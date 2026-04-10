@@ -567,38 +567,6 @@
 }
 </style>
 
-
-<style id="v26-share-cta">
-.share-primary-btn{
-  width: 100%;
-  margin: 16px 0 10px;
-  min-height: 50px;
-  border: 0;
-  border-radius: 16px;
-  background: linear-gradient(90deg,#7c5cff,#2ee6ff);
-  color: #08111f;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: .2px;
-  box-shadow: 0 12px 30px rgba(76,92,255,.24);
-}
-.share-longpress-hint{
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(255,255,255,.72);
-  text-align: center;
-}
-.share-card-highlight{
-  animation: sharePulse .8s ease;
-}
-@keyframes sharePulse{
-  0%{transform:scale(1); box-shadow:0 0 0 rgba(124,92,255,0);}
-  25%{transform:scale(1.01); box-shadow:0 0 0 6px rgba(124,92,255,.12);}
-  100%{transform:scale(1); box-shadow:0 0 0 rgba(124,92,255,0);}
-}
-</style>
-
 </head>
 <body>
   <div class="shell">
@@ -658,7 +626,7 @@
           <div class="share-zone">
             <div class="share-card-panel">
               <h3 class="panel-title">分享结果卡</h3>
-              <p class="panel-desc">这张图已经帮你排好了，直接发就行</p>
+              <p class="panel-desc">长按图片保存并分享</p>
               <div class="phone-frame">
                 <div class="phone-screen">
                   <img id="sharePreviewImage" alt="分享卡预览" />
@@ -2072,10 +2040,7 @@ const dimensionMeta = {
       shareCardState.result = result;
       sharePreviewImage.src = dataUrl;
       sharePreviewImage.alt = `${type.code}（${type.cn}）分享卡`;
-      shareStatus.textContent = '
-<button class="share-primary-btn" onclick="saveShareCard()">保存图片并分享</button>
-
-<p class="share-longpress-hint">长按图片保存并分享</p>';
+      shareStatus.textContent = '长按图片保存并分享';
     }
 
     async function updateShareCard(result) {
@@ -2152,19 +2117,6 @@ document.getElementById('startBtn').addEventListener('click', () => startTest(fa
 
 
 
-
-
-function saveShareCard() {
-  const card = document.querySelector('#shareCardPreview, .share-card-preview, .share-card-panel canvas, .share-card-panel');
-  if (card && card.scrollIntoView) {
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => {
-      const target = card.closest ? (card.closest('.share-card-panel') || card) : card;
-      target.classList.add('share-card-highlight');
-      setTimeout(() => target.classList.remove('share-card-highlight'), 900);
-    }, 250);
-  }
-}
 
 </script>
 </body>
