@@ -626,15 +626,14 @@
           <div class="share-zone">
             <div class="share-card-panel">
               <h3 class="panel-title">分享结果卡</h3>
-              <p class="panel-desc">这张图已经把结果、解读、和排进去了，保存下来就能直接发。</p>
+              <p class="panel-desc">长按图片保存并分享</p>
               <div class="phone-frame">
                 <div class="phone-screen">
                   <img id="sharePreviewImage" alt="分享卡预览" />
                 </div>
               </div>
               <div class="share-actions">
-                <button id="downloadCardBtn" class="btn-primary">保存图片并分享</button>
-              </div>
+</div>
               <div id="shareStatus" class="status-text">答题完成后会自动生成分享卡。</div>
             </div>
           </div>
@@ -2041,7 +2040,7 @@ const dimensionMeta = {
       shareCardState.result = result;
       sharePreviewImage.src = dataUrl;
       sharePreviewImage.alt = `${type.code}（${type.cn}）分享卡`;
-      shareStatus.textContent = '长按图片可保存/转发';
+      shareStatus.textContent = '长按图片保存并分享';
     }
 
     async function updateShareCard(result) {
@@ -2105,130 +2104,20 @@ document.getElementById('startBtn').addEventListener('click', () => startTest(fa
     document.getElementById('toTopBtn').addEventListener('click', () => showScreen('intro'));
   
 
-let __shareCardPressStage = 0;
 
-async function getShareCardFileData() {
-  const canvas = await ensureShareCanvasReady();
-  const blob = await new Promise((resolve, reject) => {
-    try {
-      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('empty blob')), 'image/png', 1);
-    } catch (e) {
-      reject(e);
-    }
-  });
-  const code = (window.currentResult && (window.currentResult.code || window.currentResult.type || window.currentResult.key)) || 'RESULT';
-  const filename = 'SBTI-' + String(code).replace(/[^A-Z0-9_-]/ig, '') + '-share-card.png';
-  const url = URL.createObjectURL(blob);
-  let file = null;
-  try {
-    file = new File([blob], filename, { type: 'image/png' });
-  } catch (e) {}
-  return { canvas, blob, file, filename, url };
-}
 
-function downloadByAnchor(url, filename) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename || 'SBTI-share-card.png';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    a.remove();
-    try { URL.revokeObjectURL(url); } catch (e) {}
-  }, 1200);
-}
 
-function setShareStatusText(text) {
-  const el = document.getElementById('shareStatusText');
-  if (el) el.textContent = text;
-}
 
-function openWechatSaveMask(imageUrl) {
-  const mask = document.getElementById('wechatSaveMask');
-  const preview = document.getElementById('wechatSavePreview');
-  if (!mask || !preview) return;
-  preview.src = imageUrl;
-  mask.classList.add('show');
-  setShareStatusText('请长按上方图片保存；若还想直接下载，再点一次“保存图片并分享”。');
-}
 
-function closeWechatSaveMask(evt) {
-  const mask = document.getElementById('wechatSaveMask');
-  const preview = document.getElementById('wechatSavePreview');
-  if (mask) mask.classList.remove('show');
-  if (preview && preview.src && preview.src.startsWith('blob:')) {
-    setTimeout(() => { try { URL.revokeObjectURL(preview.src); } catch (e) {} preview.src=''; }, 300);
-  } else if (preview) {
-    preview.src = '';
-  }
-}
 
-async function downloadShareCardImage() {
-  try {
-    const data = await getShareCardFileData();
-    downloadByAnchor(data.url, data.filename);
-    setShareStatusText('请长按上方图片保存；若想直接下载，再点一次“保存图片并分享”。');
-  } catch (err) {
-    console.error(err);
-    alert('保存失败，请长按上方图片试试。');
-  }
-}
 
-async function saveShareCard() {
-  try {
-    const data = await getShareCardFileData();
-    const isWechat = /MicroMessenger/i.test(navigator.userAgent || "");
 
-    if (isWechat) {
-      if (__shareCardPressStage === 0) {
-        __shareCardPressStage = 1;
-        openWechatSaveMask(data.url);
-        return;
-      }
-      __shareCardPressStage = 0;
-      closeWechatSaveMask();
-      downloadByAnchor(data.url, data.filename);
-      setShareStatusText('已切换为下载模式，若你在微信里发图，优先建议先长按保存到相册。');
-      return;
-    }
 
-    if (navigator.canShare && navigator.share && data.file) {
-      try {
-        if (navigator.canShare({ files: [data.file] })) {
-          await navigator.share({
-            files: [data.file],
-            title: data.filename,
-            text: 'SBTI 分享结果卡'
-          });
-          setShareStatusText('系统分享面板已打开。');
-          return;
-        }
-      } catch (err) {
-      }
-    }
 
-    downloadByAnchor(data.url, data.filename);
-    setShareStatusText('请长按上方图片保存；若想直接下载，再点一次“保存图片并分享”。');
-  } catch (err) {
-    console.error(err);
-    alert('生成分享卡失败，请稍后重试。');
-  }
-}
+
+
+
+
 </script>
-
-<div id="wechatSaveMask" class="wechat-save-mask" onclick="closeWechatSaveMask(event)">
-  <div class="wechat-save-panel" onclick="event.stopPropagation()">
-    <h3 class="wechat-save-title">长按图片保存到相册</h3>
-    <p class="wechat-save-sub">微信里最稳的方式是：先长按下面这张图保存到相册，再去聊天窗口发送。为了少折腾你，这个按钮第一次点默认就是提醒你长按保存；如果你再点一次按钮，就会直接下载图片。</p>
-    <img id="wechatSavePreview" class="wechat-save-preview" alt="分享卡预览" />
-    <div class="wechat-save-actions">
-      <button class="wechat-save-btn primary" onclick="downloadShareCardImage()">保存到设备</button>
-      <button class="wechat-save-btn" onclick="closeWechatSaveMask()">关闭</button>
-    </div>
-    <div class="wechat-save-tip">提示：在微信里优先用“长按图片 → 保存图片”。保存后，再到聊天窗口选择图片发送，最稳。</div>
-  </div>
-</div>
-
 </body>
 </html>
