@@ -166,7 +166,7 @@
     .poster-box { position: relative; min-height: 560px; border-radius: 28px; overflow: hidden; background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.08); }
     .poster-box.no-image { display: grid; place-items: center; }
     .poster-box.no-image::before { content: "原始结果图缺失"; color: var(--muted); font-size: 15px; }
-    .poster-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .poster-image { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; background: #ffffff; padding: 12px; box-sizing: border-box; }
     .poster-caption { position: absolute; left: 18px; right: 18px; bottom: 18px; padding: 14px 16px; border-radius: 18px; background: rgba(6, 10, 18, 0.76); border: 1px solid rgba(255,255,255,0.12); color: #f8fbff; line-height: 1.6; }
     .type-box { padding: 24px; display: flex; flex-direction: column; justify-content: center; }
     .type-kicker { color: var(--muted); font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .08em; }
@@ -395,6 +395,39 @@
 }
 </style>
 
+
+<style id="v16-result-detail-fix">
+.analysis-box h3,
+.dim-box h3,
+.note-box h3{
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 800;
+  margin: 0 0 14px;
+  color: #fff;
+}
+.analysis-box,
+.dim-box,
+.note-box{
+  padding: 24px;
+}
+.analysis-box p,
+.note-box p{
+  line-height: 1.8;
+}
+.poster-box{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.poster-caption{
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  bottom: 24px;
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -468,19 +501,18 @@
           </div>
 
           <div class="analysis-box">
-            <h3></h3>
+            <h3>你的类型解读</h3>
             <p id="resultDesc"></p>
           </div>
 
           <div class="dim-box">
-            <h3></h3>
+            <h3>维度参考</h3>
             <div id="dimList" class="dim-list"></div>
           </div>
 
           <div class="note-box">
-            <h3></h3>
-            <p id="funNote">说明
-本测试仅供娱乐，别拿它当诊断、面试、相亲、分手、招魂、算命或人生判决书。</p>
+            <h3>说明</h3>
+            <p id="funNote">本测试仅供娱乐，别拿它当诊断、面试、相亲、分手、招魂、算命或人生判决书。</p>
             <div class="result-footer-note">保留原版题库与结果判定，只把首页和结果页做得更适合直接使用和分享。</div>
           </div>
         </div>
