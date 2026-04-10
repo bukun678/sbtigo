@@ -508,6 +508,27 @@
 }
 </style>
 
+
+<style id="v21-force-hide-question-mid">
+.question-head-mid,
+.question-meta .question-head-mid{
+  display:none !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:0 !important;
+  overflow:hidden !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+}
+</style>
+
+
+<style id="v22-hide-question-stage">
+.question-stage{
+  display:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="shell">
@@ -1412,7 +1433,7 @@ const dimensionMeta = {
             <div class="badge">第 ${currentIndex + 1} 题 / 共 ${visibleQuestions.length} 题</div>
             <div>${getQuestionMetaLabel(q)}</div>
           </div>
-          <div class="question-stage">维度已隐藏</div>
+          
         </div>
         <div class="question-title">${q.text}</div>
         <div class="options">
